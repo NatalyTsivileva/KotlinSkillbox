@@ -5,11 +5,17 @@ import curswork.goods.food.FoodGoods
 import curswork.goods.medium.MediumGood
 import curswork.goods.oversized.OversizeGood
 import curswork.goods.small.SmallGood
-import curswork.utils.*
-import kotlinx.coroutines.*
+import curswork.utils.openLoadingPort
+import curswork.utils.openUnloadingPort
+import curswork.utils.produceLoadingTrucks
+import curswork.utils.produceUnloadingTrucks
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.joinAll
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import java.util.LinkedList
+import java.util.*
 import kotlin.reflect.KClass
 
 class DistributionCenter(
@@ -17,7 +23,7 @@ class DistributionCenter(
     private val unloadingPortCount: Int,
     private val loadingPortCount: Int,
     countOfUnloadingTrucks: Int = 10,
-    countOfLoadingTrucks: Int = 5
+    countOfLoadingTrucks: Int = 50
 ) {
 
 
@@ -29,7 +35,7 @@ class DistributionCenter(
     private val loadingChannel = scope.produceLoadingTrucks(countOfLoadingTrucks)
 
     private val foodGoods = LinkedList<FoodGoods>()
-    private val mediumGoods = LinkedList <MediumGood>()
+    private val mediumGoods = LinkedList<MediumGood>()
     private val oversizeGoods = LinkedList<OversizeGood>()
     private val smallGoods = LinkedList<SmallGood>()
 
@@ -48,14 +54,14 @@ class DistributionCenter(
         }
         scope.launch {
             unloadingPorts.joinAll()
-           /* printStorageInfo(FoodGoods::class, foodGoods)
-            printStorageInfo(MediumGood::class, mediumGoods)
-            printStorageInfo(SmallGood::class, smallGoods)
-            printStorageInfo(OversizeGood::class, oversizeGoods)*/
+            /* printStorageInfo(FoodGoods::class, foodGoods)
+             printStorageInfo(MediumGood::class, mediumGoods)
+             printStorageInfo(SmallGood::class, smallGoods)
+             printStorageInfo(OversizeGood::class, oversizeGoods)*/
         }
     }
 
-    private  fun addItemToStore(item: IDistributionItem): Boolean = when (item) {
+    private fun addItemToStore(item: IDistributionItem): Boolean = when (item) {
         is FoodGoods -> foodGoods.add(item)
         is MediumGood -> mediumGoods.add(item)
         is OversizeGood -> oversizeGoods.add(item)
@@ -73,13 +79,16 @@ class DistributionCenter(
     }
 
     suspend fun getItemByCategory(category: KClass<*>): IDistributionItem? {
+        println("getItemByCategory() category=$category")
         mutex.withLock {
-           return when(category){
+            val item = when (category) {
                 FoodGoods::class -> foodGoods.poll()
                 OversizeGood::class -> oversizeGoods.poll()
                 MediumGood::class -> mediumGoods.poll()
                 else -> smallGoods.poll()
             }
+            println(item)
+            return item
         }
     }
 
@@ -95,19 +104,19 @@ class DistributionCenter(
 
             val job = scope.openLoadingPort(id, loadingChannel, ::getItemByCategory)
             loadingPorts.add(job)
-        // {
+            // {
         }
-               /* do {
+        /* do {
 
-                    val items =
-                        foodGoods.getItems() + oversizeGoods.getItems() + mediumGoods.getItems() + smallGoods.getItems()
+             val items =
+                 foodGoods.getItems() + oversizeGoods.getItems() + mediumGoods.getItems() + smallGoods.getItems()
 
-                    val truck = LoadingTruckGenerator.getRandomTruck()
+             val truck = LoadingTruckGenerator.getRandomTruck()
 
 
-                    val clazz = getTypeFromList(truck.getItems())
+             val clazz = getTypeFromList(truck.getItems())
 
-                    *//*  val items:MutableList<out Good> = when (clazz) {
+             *//*  val items:MutableList<out Good> = when (clazz) {
                       FoodGoods::class -> foodGoods.getItemsByCategory(FoodGoods::class)
                       OversizeGood::class -> oversizeGoods.getItemsByCategory(OversizeGood::class)
                       MediumGood::class -> mediumGoods.getItemsByCategory(MediumGood::class)

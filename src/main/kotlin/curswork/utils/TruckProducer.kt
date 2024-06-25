@@ -2,7 +2,6 @@ package curswork.utils
 
 import curswork.base.IDistributionItem
 import curswork.base.IDistributor
-import curswork.goods.Good
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.produce
@@ -22,7 +21,7 @@ fun CoroutineScope.produceUnloadingTrucks(count: Int) = produce {
 
 fun CoroutineScope.openUnloadingPort(
     portId: Int,
-    channel: ReceiveChannel<IDistributor<IDistributionItem>>,
+    channel: ReceiveChannel<IDistributor>,
     saveItemFun: suspend (item: IDistributionItem) -> Boolean
 ) = launch {
     for (distributor in channel) {
@@ -37,26 +36,27 @@ fun CoroutineScope.openUnloadingPort(
 }
 
 
-fun CoroutineScope.produceLoadingTrucks(count: Int):ReceiveChannel<IDistributor<IDistributionItem>> = produce {
+fun CoroutineScope.produceLoadingTrucks(count: Int): ReceiveChannel<IDistributor> = produce {
     var itemsCount = count
     while (itemsCount > 0) {
+        delay(1000)
         val truck = LoadingTruckGenerator.getRandomTruck()
         send(truck)
         itemsCount--
     }
-    // println("тип списка:${getTypeFromList(truck.getItems())}")
 }
 
-fun CoroutineScope. openLoadingPort(
+fun CoroutineScope.openLoadingPort(
     portId: Int,
-    channel: ReceiveChannel<IDistributor<IDistributionItem>>,
+    channel: ReceiveChannel<IDistributor>,
     getItem: suspend (clazz: KClass<*>) -> IDistributionItem?
 ) = launch {
+    delay(2000)
 
     for (distributor in channel) {
         val clazz = getTypeFromList(distributor.getItems())
         val item = getItem(clazz)
-        delay(item?.getTime()?:0)
+        delay(item?.getTime() ?: 0)
         if (item != null) {
             distributor.addItem(item)
             println("Загрузка: PortID=$portId [${distributor::class.simpleName}][${distributor.hashCode()}] Выгрузил: ${item::class.simpleName}, вес: ${item.getVolume()}, за время ${item.getTime()}")

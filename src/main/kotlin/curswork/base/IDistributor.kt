@@ -3,7 +3,7 @@ package curswork.base
 /**
  * Торговый посредник, поставляющий товары и услуги от производителя потребителю.
  */
-interface IDistributor<T : IDistributionItem> {
+interface IDistributor {
     /**
      * Узнать вместимость - объем услуг/товаров дестрибьютора
      */
@@ -12,11 +12,11 @@ interface IDistributor<T : IDistributionItem> {
     /**
      * Получить предоставляемые дистрибьютором товары/услуги
      */
-    fun getItems(): List<T>
+    fun getItems(): List<IDistributionItem>
 
     /**
      * Добавить услугу/товар дистрибьютору
      */
-    fun addItem(item: T):Boolean
+    fun addItem(item: IDistributionItem):Boolean
 
 }

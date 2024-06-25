@@ -1,8 +1,7 @@
 package curswork.trucks
 
-import curswork.base.IDistributionItem
 
-class VanTruck<T : IDistributionItem> : Truck<T>() {
+class VanTruck : Truck() {
 
     override fun getCapacity(): Int {
         return 9550
