@@ -39,7 +39,6 @@ fun CoroutineScope.openUnloadingPort(
 fun CoroutineScope.produceLoadingTrucks(count: Int): ReceiveChannel<IDistributor> = produce {
     var itemsCount = count
     while (itemsCount > 0) {
-        delay(1000)
         val truck = LoadingTruckGenerator.getRandomTruck()
         send(truck)
         itemsCount--
@@ -54,13 +53,16 @@ fun CoroutineScope.openLoadingPort(
     delay(2000)
 
     for (distributor in channel) {
-        val clazz = getTypeFromList(distributor.getItems())
-        val item = getItem(clazz)
-        delay(item?.getTime() ?: 0)
-        if (item != null) {
-            distributor.addItem(item)
-            println("Загрузка: PortID=$portId [${distributor::class.simpleName}][${distributor.hashCode()}] Выгрузил: ${item::class.simpleName}, вес: ${item.getVolume()}, за время ${item.getTime()}")
-        }
+        do {
+            var isAdded = false
+            val clazz = getTypeFromList(distributor.getItems())
+            val item = getItem(clazz)
+            delay(item?.getTime() ?: 0)
+            if (item != null) {
+                isAdded = distributor.addItem(item)
+                println("Загрузка: PortID=$portId [${distributor::class.simpleName}][${distributor.hashCode()}] Выгрузил: ${item::class.simpleName}, вес: ${item.getVolume()}, за время ${item.getTime()}")
+            }
+        } while (isAdded)
     }
 }
 

@@ -54,10 +54,7 @@ class DistributionCenter(
         }
         scope.launch {
             unloadingPorts.joinAll()
-            /* printStorageInfo(FoodGoods::class, foodGoods)
-             printStorageInfo(MediumGood::class, mediumGoods)
-             printStorageInfo(SmallGood::class, smallGoods)
-             printStorageInfo(OversizeGood::class, oversizeGoods)*/
+             printStorageInfo()
         }
     }
 
@@ -79,7 +76,6 @@ class DistributionCenter(
     }
 
     suspend fun getItemByCategory(category: KClass<*>): IDistributionItem? {
-        println("getItemByCategory() category=$category")
         mutex.withLock {
             val item = when (category) {
                 FoodGoods::class -> foodGoods.poll()
@@ -104,7 +100,7 @@ class DistributionCenter(
 
             val job = scope.openLoadingPort(id, loadingChannel, ::getItemByCategory)
             loadingPorts.add(job)
-            // {
+
         }
         /* do {
 
@@ -137,11 +133,24 @@ class DistributionCenter(
     }
 
 
-    private fun printStorageInfo(category: KClass<*>, map: Map<KClass<*>, MutableList<*>>) {
-        map.forEach { (key, value) ->
-            println("Склад. Товары категории ${category.simpleName} - ${key.simpleName}, count=${value.count()}")
+    private fun printStorageInfo() {
+        foodGoods.forEach {
+            println(getInfo("FoodGoods",it::class,foodGoods.count()))
         }
+        oversizeGoods.forEach {
+            println(getInfo("OversizedGood",it::class,oversizeGoods.count()))
+        }
+        mediumGoods.forEach {
+            println(getInfo("MediumGoods",it::class,mediumGoods.count()))
+        }
+        smallGoods.forEach {
+            println(getInfo("SmallGoods",it::class,smallGoods.count()))
+        }
+
     }
+
+    private fun getInfo(name:String, itemClass:KClass<*>,count:Int)=println("Склад. Товары категории ${name} - ${itemClass.simpleName}, count=${count}")
+
 
 }
 
