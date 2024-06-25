@@ -6,4 +6,8 @@ import curswork.goods.Good
  * Среднегабаритные товары
  */
 
-abstract class MediumGood : Good()
+abstract class MediumGood : Good() {
+
+    override val category = GoodCategory.MEDIUM
+
+}

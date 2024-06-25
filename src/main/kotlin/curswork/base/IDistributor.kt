@@ -17,6 +17,10 @@ interface IDistributor<T : IDistributionItem> {
     /**
      * Добавить услугу/товар дистрибьютору
      */
-    fun addItem(item: T):Boolean
+    fun addItem(item: T): Boolean
 
+    /**
+     * Полностью ли дистрибьютор заполнен товаром/услугами
+     */
+    fun isFull(): Boolean
 }

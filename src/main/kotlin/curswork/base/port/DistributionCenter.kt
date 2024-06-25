@@ -1,15 +1,21 @@
 package curswork.base.port
 
 import curswork.base.IDistributionItem
+import curswork.goods.Good
 import curswork.goods.food.FoodGoods
 import curswork.goods.medium.MediumGood
 import curswork.goods.oversized.OversizeGood
 import curswork.goods.small.SmallGood
-import curswork.utils.*
+import curswork.utils.openLoadingPort
+import curswork.utils.openUnloadingPort
+import curswork.utils.produceLoadingTrucks
+import curswork.utils.produceUnloadingTrucks
 import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.ticker
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import java.util.LinkedList
+import java.util.*
+import kotlin.concurrent.timerTask
 import kotlin.reflect.KClass
 
 class DistributionCenter(
@@ -29,7 +35,7 @@ class DistributionCenter(
     private val loadingChannel = scope.produceLoadingTrucks(countOfLoadingTrucks)
 
     private val foodGoods = LinkedList<FoodGoods>()
-    private val mediumGoods = LinkedList <MediumGood>()
+    private val mediumGoods = LinkedList<MediumGood>()
     private val oversizeGoods = LinkedList<OversizeGood>()
     private val smallGoods = LinkedList<SmallGood>()
 
@@ -39,6 +45,7 @@ class DistributionCenter(
     init {
         createUnloadingPorts()
         createLoadingPorts()
+        createLogger()
     }
 
     private fun createUnloadingPorts() {
@@ -48,14 +55,10 @@ class DistributionCenter(
         }
         scope.launch {
             unloadingPorts.joinAll()
-           /* printStorageInfo(FoodGoods::class, foodGoods)
-            printStorageInfo(MediumGood::class, mediumGoods)
-            printStorageInfo(SmallGood::class, smallGoods)
-            printStorageInfo(OversizeGood::class, oversizeGoods)*/
         }
     }
 
-    private  fun addItemToStore(item: IDistributionItem): Boolean = when (item) {
+    private fun addItemToStore(item: IDistributionItem): Boolean = when (item) {
         is FoodGoods -> foodGoods.add(item)
         is MediumGood -> mediumGoods.add(item)
         is OversizeGood -> oversizeGoods.add(item)
@@ -72,13 +75,13 @@ class DistributionCenter(
         }
     }
 
-    suspend fun getItemByCategory(category: KClass<*>): IDistributionItem? {
+    suspend fun getItemByCategory(category: Good.GoodCategory): IDistributionItem? {
         mutex.withLock {
-           return when(category){
-                FoodGoods::class -> foodGoods.poll()
-                OversizeGood::class -> oversizeGoods.poll()
-                MediumGood::class -> mediumGoods.poll()
-                else -> smallGoods.poll()
+            return when (category) {
+                Good.GoodCategory.OVERSIZE -> oversizeGoods.poll()
+                Good.GoodCategory.MEDIUM -> mediumGoods.poll()
+                Good.GoodCategory.SMALL -> smallGoods.poll()
+                Good.GoodCategory.FOOD -> foodGoods.poll()
             }
         }
     }
@@ -92,45 +95,33 @@ class DistributionCenter(
 
     private fun createLoadingPorts() {
         repeat(loadingPortCount) { id ->
-
             val job = scope.openLoadingPort(id, loadingChannel, ::getItemByCategory)
             loadingPorts.add(job)
-        // {
         }
-               /* do {
-
-                    val items =
-                        foodGoods.getItems() + oversizeGoods.getItems() + mediumGoods.getItems() + smallGoods.getItems()
-
-                    val truck = LoadingTruckGenerator.getRandomTruck()
-
-
-                    val clazz = getTypeFromList(truck.getItems())
-
-                    *//*  val items:MutableList<out Good> = when (clazz) {
-                      FoodGoods::class -> foodGoods.getItemsByCategory(FoodGoods::class)
-                      OversizeGood::class -> oversizeGoods.getItemsByCategory(OversizeGood::class)
-                      MediumGood::class -> mediumGoods.getItemsByCategory(MediumGood::class)
-                      else -> smallGoods.getItemsByCategory(SmallGood::class)
-                  }
-  *//*
-                   *//* do {
-                        items.forEach {
-                            delay(it.getTime())
-                            truck.addItem(it)
-                        }
-                    } while ()
-                    //while (items.)
-*//*
-                }while (items.isNotEmpty())*/
-
         scope.launch { loadingPorts.joinAll() }
     }
 
+    fun createLogger() {
 
-    private fun printStorageInfo(category: KClass<*>, map: Map<KClass<*>, MutableList<*>>) {
-        map.forEach { (key, value) ->
-            println("Склад. Товары категории ${category.simpleName} - ${key.simpleName}, count=${value.count()}")
+        val job = scope.launch {
+            do {
+                delay(2000)
+                printStorageInfo(Good.GoodCategory.FOOD, foodGoods)
+                printStorageInfo(Good.GoodCategory.OVERSIZE, oversizeGoods)
+                printStorageInfo(Good.GoodCategory.SMALL, smallGoods)
+                printStorageInfo(Good.GoodCategory.MEDIUM, mediumGoods)
+            } while (unloadingPorts.all { it.isActive } && loadingPorts.all { it.isActive })
+        }
+
+        scope.launch {
+            job.join()
+        }
+    }
+
+    private fun <T : IDistributionItem> printStorageInfo(category: Good.GoodCategory, list: LinkedList<T>) {
+        println("==========================================================================================")
+        list.forEach { item ->
+            println("Склад. Товары категории ${category.name.uppercase()} - ${item::class.simpleName}, count=${list.count()}")
         }
     }
 

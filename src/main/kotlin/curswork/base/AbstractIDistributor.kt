@@ -15,6 +15,10 @@ abstract class AbstractIDistributor<T : IDistributionItem> : IDistributor<T> {
         return isCanAdd
     }
 
+    override fun isFull(): Boolean {
+        return getCapacity() <= getItems().sumOf { it.getVolume() }
+    }
+
     override fun toString(): String {
         return """
             ============================================================================
