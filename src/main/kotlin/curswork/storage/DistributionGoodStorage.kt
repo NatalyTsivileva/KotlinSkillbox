@@ -43,6 +43,17 @@ class DistributionGoodStorage : IGoodStorage {
         }
     }
 
+    override suspend fun getGoodByCategory(category: Good.GoodCategory): Good? {
+        getMutex.withLock {
+            return when (category) {
+                Good.GoodCategory.OVERSIZE -> oversizeGoods.peek()
+                Good.GoodCategory.MEDIUM -> mediumGoods.peek()
+                Good.GoodCategory.SMALL -> smallGoods.peek()
+                Good.GoodCategory.FOOD -> foodGoods.peek()
+            }
+        }
+    }
+
     fun getStorageInfo() {
         val blackColor = "\u001B[30m"
         println()

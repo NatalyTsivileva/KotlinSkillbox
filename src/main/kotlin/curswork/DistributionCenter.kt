@@ -57,11 +57,12 @@ class DistributionCenter(
     private fun createLoadingPorts() {
         repeat(loadingPortCount) { id ->
             val port = LoadingPort(
-                scope = scope,
                 portID = id,
-                getItemFunction = storage::fetchGoodByCategory,
+                scope = scope,
                 channel = loadingChannel,
-                timeOutInMls = workTimeInMls
+                timeOutInMls = workTimeInMls,
+                getItemFunction = storage::getGoodByCategory,
+                fetchItemFunction = storage::fetchGoodByCategory
             )
             loadingPorts.add(port)
         }

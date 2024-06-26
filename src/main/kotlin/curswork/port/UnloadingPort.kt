@@ -2,6 +2,7 @@ package curswork.port
 
 import curswork.distributor.IDistributionItem
 import curswork.goods.Good
+import curswork.logger.ColorfulLogger
 import curswork.types.AnyDistributor
 import curswork.utils.UnloadingTruckGenerator
 import kotlinx.coroutines.*
@@ -13,7 +14,8 @@ class UnloadingPort(
     portID: Int,
     channel: ReceiveChannel<AnyDistributor>,
     timeOutInMls: Long,
-    val saveItemFunction: suspend (item: Good) -> Boolean
+    val saveItemFunction: suspend (item: Good) -> Boolean,
+    val logger: ColorfulLogger = ColorfulLogger()
 ) : AbstractPort<AnyDistributor>(scope = scope, portID = portID, channel = channel, timeOutInMls = timeOutInMls) {
 
     private var job: Job? = null
@@ -45,8 +47,9 @@ class UnloadingPort(
     }
 
     override fun logPortation(portable: AnyDistributor, item: IDistributionItem) {
-        val greenColor = "\u001B[32m"
-        println("\t${greenColor}ВЫГРУЗКА: PortID=$portID [${portable::class.simpleName}][${portable.hashCode()}] Выгрузил: ${item::class.simpleName}, вес: ${item.getVolume()}, за время ${item.getTime()}")
+          val text =
+            "\tВЫГРУЗКА: PortID=$portID [${portable::class.simpleName}][${portable.hashCode()}] Выгрузил: ${item::class.simpleName}, вес: ${item.getVolume()}, за время ${item.getTime()}"
+        logger.log(text, ColorfulLogger.Color.GREEN)
     }
 
     companion object {
