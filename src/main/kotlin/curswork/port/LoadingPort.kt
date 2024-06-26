@@ -19,7 +19,7 @@ class LoadingPort(
     timeOutInMls: Long,
     val fetchItemFunction: suspend (category: Good.GoodCategory) -> IDistributionItem?,
     val getItemFunction: suspend (category: Good.GoodCategory) -> IDistributionItem?,
-    val logger: ColorfulLogger = ColorfulLogger()
+    val logger: ColorfulLogger
 ) : AbstractPort<AnyGoodsDistributor>(portID = portID, scope = scope, channel = channel, timeOutInMls = timeOutInMls) {
 
     private var job: Job? = null
@@ -37,10 +37,10 @@ class LoadingPort(
                             delay(10)
 
                             if (item != null) {
-                                delay(item.getTime())
                                 val isAdded = distributor.addItem(item)
                                 if (isAdded) {
                                     logPortation(pair, item)
+                                    delay(item.getTime())
                                     fetchItemFunction(pair.second)
                                 }
                             }
@@ -69,16 +69,16 @@ class LoadingPort(
 
         val color = ColorfulLogger.Color.RED
         var text = "\tЗАГРУЗКА: PortID=$portID $distributorName ГРУЗИТ ТОЛЬКО $categoryName"
-        logger.log(text, color)
+        logger.logColorful(text, color)
 
         text = " \t\t[$itemName] вес: ${item.getVolume()}, за время ${item.getTime()}. Осталось места: $freePlace"
-        logger.log(text, color)
+        logger.logColorful(text, color)
     }
 
 
     private fun logDistributorFetching(portable: AnyGoodsDistributor) {
-        val text ="\tПолностью загружен и выехал из порта: PortID=$portID ${portable.first::class.simpleName}, категория:${portable.second.name.uppercase()}"
-        logger.log(text, ColorfulLogger.Color.BLACK)
+        val text = "\tПолностью загружен и выехал из порта: PortID=$portID ${portable.first::class.simpleName}, категория:${portable.second.name.uppercase()}"
+        logger.logColorful(text)
     }
 
 

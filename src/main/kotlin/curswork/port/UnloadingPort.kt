@@ -15,7 +15,7 @@ class UnloadingPort(
     channel: ReceiveChannel<AnyDistributor>,
     timeOutInMls: Long,
     val saveItemFunction: suspend (item: Good) -> Boolean,
-    val logger: ColorfulLogger = ColorfulLogger()
+    val logger: ColorfulLogger
 ) : AbstractPort<AnyDistributor>(scope = scope, portID = portID, channel = channel, timeOutInMls = timeOutInMls) {
 
     private var job: Job? = null
@@ -29,9 +29,12 @@ class UnloadingPort(
                         distributor.getItems().forEach { item ->
                             delay(item.getTime())
 
-                            (item as? Good)?.apply { saveItemFunction(this) }
+                            (item as? Good)?.apply {
+                               val saved = saveItemFunction(this)
+                                if (saved) logPortation(distributor, item)
+                            }
 
-                            logPortation(distributor, item)
+
                         }
                     }
                 }
@@ -49,7 +52,7 @@ class UnloadingPort(
     override fun logPortation(portable: AnyDistributor, item: IDistributionItem) {
           val text =
             "\tВЫГРУЗКА: PortID=$portID [${portable::class.simpleName}][${portable.hashCode()}] Выгрузил: ${item::class.simpleName}, вес: ${item.getVolume()}, за время ${item.getTime()}"
-        logger.log(text, ColorfulLogger.Color.GREEN)
+        logger.logColorful(text, ColorfulLogger.Color.GREEN)
     }
 
     companion object {

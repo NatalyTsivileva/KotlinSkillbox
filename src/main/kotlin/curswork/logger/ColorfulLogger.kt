@@ -2,7 +2,7 @@ package curswork.logger
 
 class ColorfulLogger : ConsoleLogger() {
 
-    fun log(message: String, color: Color = Color.BLACK) {
+    fun logColorful(message: String, color: Color = Color.BLACK) {
         log("${color.value}$message")
     }
 
