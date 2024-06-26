@@ -1,4 +1,4 @@
-import curswork.base.port.DistributionCenter
+import curswork.DistributionCenter
 import curswork.goods.food.FoodGoods
 import curswork.utils.UnloadingTruckGenerator
 import kotlinx.coroutines.runBlocking
@@ -24,6 +24,12 @@ class DistributionInterruptFunctionCenterTest {
 
     @Test
     fun testUnloadingDistributionPort(): Unit = runBlocking {
-        val center = DistributionCenter(scope = this, unloadingPortCount = 5, loadingPortCount = 3)
+        val center = DistributionCenter(
+            scope = this,
+            unloadingPortCount = 5,
+            loadingPortCount = 3,
+            countOfUnloadingTrucks = 200,
+            countOfLoadingTrucks = 500
+        )
     }
 }

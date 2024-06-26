@@ -1,8 +1,9 @@
 package curswork.utils
 
-import curswork.base.IDistributionItem
-import curswork.base.IDistributor
+import curswork.distributor.IDistributionItem
+import curswork.distributor.IDistributor
 import curswork.goods.Good
+import curswork.types.AnyGoodsDistributor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.ReceiveChannel
@@ -39,10 +40,7 @@ fun CoroutineScope.openUnloadingPort(
     cancel()
 }
 
-typealias AnyDistributor = IDistributor<IDistributionItem>
-typealias AnyDistributorWithGoodCategory = Pair<AnyDistributor, Good.GoodCategory>
-
-fun CoroutineScope.produceLoadingTrucks(count: Int): ReceiveChannel<AnyDistributorWithGoodCategory> = produce {
+fun CoroutineScope.produceLoadingTrucks(count: Int): ReceiveChannel<AnyGoodsDistributor> = produce {
     var itemsCount = count
     while (itemsCount > 0) {
         val truck = LoadingTruckGenerator.createLoadingTruck<IDistributionItem>()
@@ -56,7 +54,7 @@ fun CoroutineScope.produceLoadingTrucks(count: Int): ReceiveChannel<AnyDistribut
 
 fun CoroutineScope.openLoadingPort(
     portId: Int,
-    channel: ReceiveChannel<AnyDistributorWithGoodCategory>,
+    channel: ReceiveChannel<AnyGoodsDistributor>,
     getItem: suspend (category: Good.GoodCategory) -> IDistributionItem?
 ) = launch {
 

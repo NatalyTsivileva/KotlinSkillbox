@@ -1,7 +1,7 @@
 package curswork.utils
 
-import curswork.base.IDistributionItem
-import curswork.base.IDistributor
+import curswork.distributor.IDistributionItem
+import curswork.distributor.IDistributor
 import curswork.goods.Good
 import curswork.goods.Good.GoodCategory.*
 import curswork.goods.food.FoodGoods

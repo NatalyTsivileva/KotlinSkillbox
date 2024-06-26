@@ -1,6 +1,6 @@
 package curswork.goods
 
-import curswork.base.IDistributionItem
+import curswork.distributor.IDistributionItem
 
 /**
  * Класс товаров, которые можно доставить

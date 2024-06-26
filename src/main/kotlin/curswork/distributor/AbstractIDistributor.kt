@@ -1,4 +1,4 @@
-package curswork.base
+package curswork.distributor
 
 abstract class AbstractIDistributor<T : IDistributionItem> : IDistributor<T> {
 

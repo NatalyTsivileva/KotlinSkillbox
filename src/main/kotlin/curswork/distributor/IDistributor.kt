@@ -1,4 +1,4 @@
-package curswork.base
+package curswork.distributor
 
 /**
  * Торговый посредник, поставляющий товары и услуги от производителя потребителю.

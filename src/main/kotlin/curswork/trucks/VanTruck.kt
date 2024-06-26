@@ -1,6 +1,6 @@
 package curswork.trucks
 
-import curswork.base.IDistributionItem
+import curswork.distributor.IDistributionItem
 
 class VanTruck<T : IDistributionItem> : Truck<T>() {
 

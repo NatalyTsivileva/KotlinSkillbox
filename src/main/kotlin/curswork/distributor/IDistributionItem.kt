@@ -1,4 +1,4 @@
-package curswork.base
+package curswork.distributor
 
 /**
  * Элемент дистрибьюции.
