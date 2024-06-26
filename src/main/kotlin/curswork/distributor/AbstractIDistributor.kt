@@ -2,6 +2,8 @@ package curswork.distributor
 
 abstract class AbstractIDistributor<T : IDistributionItem> : IDistributor<T> {
 
+    private var isFull: Boolean = false
+
     private val items = mutableListOf<T>()
 
     override fun getItems(): List<T> {
@@ -12,11 +14,12 @@ abstract class AbstractIDistributor<T : IDistributionItem> : IDistributor<T> {
         val totalSum = items.sumOf { it.getVolume() }
         val isCanAdd = totalSum + item.getVolume() <= getCapacity()
         if (isCanAdd) items.add(item)
+        isFull = !isCanAdd
         return isCanAdd
     }
 
     override fun isFull(): Boolean {
-        return getCapacity() <= getItems().sumOf { it.getVolume() }
+        return isFull
     }
 
     override fun toString(): String {

@@ -1,9 +1,12 @@
 import curswork.DistributionCenter
+import curswork.goods.food.Bread
 import curswork.goods.food.FoodGoods
+import curswork.trucks.VanTruck
 import curswork.utils.UnloadingTruckGenerator
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import java.util.concurrent.TimeUnit
 
 class DistributionInterruptFunctionCenterTest {
 
@@ -28,8 +31,18 @@ class DistributionInterruptFunctionCenterTest {
             scope = this,
             unloadingPortCount = 5,
             loadingPortCount = 3,
-            countOfUnloadingTrucks = 200,
-            countOfLoadingTrucks = 500
+            workTimeInMls = TimeUnit.MINUTES.toMillis(2)
         )
+    }
+
+    @Test
+    fun testCycleAdding(){
+        val distributor = VanTruck<FoodGoods>()
+
+        do {
+            val added = distributor.addItem(Bread())
+        }while (!distributor.isFull())
+
+        println("count=${distributor.getItems().count()}")
     }
 }

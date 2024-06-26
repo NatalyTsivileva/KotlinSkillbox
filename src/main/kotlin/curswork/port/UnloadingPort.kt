@@ -4,11 +4,9 @@ import curswork.distributor.IDistributionItem
 import curswork.goods.Good
 import curswork.types.AnyDistributor
 import curswork.utils.UnloadingTruckGenerator
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.produce
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 class UnloadingPort(
     scope: CoroutineScope,
@@ -17,9 +15,10 @@ class UnloadingPort(
     val saveItemFunction: suspend (item: Good) -> Boolean
 ) : AbstractPort<AnyDistributor>(scope = scope, portID = portID, channel = channel) {
 
+    private var job: Job? = null
 
     override fun open() {
-        scope.launch {
+        job = scope.launch {
             for (distributor in channel) {
 
                 distributor.getItems().forEach { item ->
@@ -33,6 +32,11 @@ class UnloadingPort(
         }
     }
 
+    override fun close() {
+        super.close()
+        job?.cancel()
+    }
+
     override fun logPortation(portable: AnyDistributor, item: IDistributionItem) {
         val greenColor = "\u001B[32m"
         println("\t${greenColor}ВЫГРУЗКА: PortID=$portID [${portable::class.simpleName}][${portable.hashCode()}] Выгрузил: ${item::class.simpleName}, вес: ${item.getVolume()}, за время ${item.getTime()}")
@@ -40,12 +44,10 @@ class UnloadingPort(
 
     companion object {
 
-        fun createUnloadingChannel(truckCount: Int, scope: CoroutineScope) = scope.produce {
-            var itemsCount = truckCount
-            while (itemsCount > 0) {
+        fun createUnloadingChannel(scope: CoroutineScope) = scope.produce {
+            while (isActive) {
                 val truck = UnloadingTruckGenerator.getRandomTruck()
                 send(truck)
-                itemsCount--
                 delay(1000)
             }
         }

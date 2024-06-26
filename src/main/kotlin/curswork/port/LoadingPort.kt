@@ -6,11 +6,9 @@ import curswork.trucks.FireTruck
 import curswork.trucks.TankerTruck
 import curswork.types.AnyDistributor
 import curswork.types.AnyGoodsDistributor
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.produce
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlin.random.Random
 
 class LoadingPort(
@@ -20,10 +18,13 @@ class LoadingPort(
     val getItemFunction: suspend (category: Good.GoodCategory) -> IDistributionItem?
 ) : AbstractPort<AnyGoodsDistributor>(portID = portID, scope = scope, channel = channel) {
 
+    private var job: Job? = null
 
     override fun open() {
-        scope.launch {
+        job = scope.launch {
+
             for (pair in channel) {
+
                 do {
                     val distributor = pair.first
                     val item = getItemFunction(pair.second)
@@ -31,11 +32,7 @@ class LoadingPort(
 
                     if (item != null) {
                         delay(item.getTime())
-
-                        val isItemAdded = distributor.addItem(item)
-
-                        if (!isItemAdded) break
-
+                        distributor.addItem(item)
                         logPortation(pair, item)
                     }
 
@@ -44,22 +41,29 @@ class LoadingPort(
         }
     }
 
+    override fun close() {
+        super.close()
+        job?.cancel()
+    }
+
     override fun logPortation(portable: AnyGoodsDistributor, item: IDistributionItem) {
         val distributor = portable.first
         val freePlace = distributor.getCapacity() - distributor.getItems().sumOf { it.getVolume() }
-        val redColor = "\u001B[31m"
+        val distributorName = "${distributor::class.simpleName}[ID=${distributor.hashCode()}]"
+        val itemName = item::class.simpleName
+        val categoryName = portable.second.name.uppercase()
 
-        println("\t\t${redColor}ЗАГРУЗКА: PortID=$portID [${distributor::class.simpleName}][${distributor.hashCode()}] ${item::class.simpleName}, вес: ${item.getVolume()}, за время ${item.getTime()}. Осталось места: $freePlace")
+        val redColor = "\u001B[31m"
+        println("\t${redColor}ЗАГРУЗКА: PortID=$portID $distributorName ГРУЗИТ ТОЛЬКО $categoryName")
+        println(" \t\t${redColor}[$itemName] вес: ${item.getVolume()}, за время ${item.getTime()}. Осталось места: $freePlace")
     }
 
     companion object {
-        fun createLoadingChannel(truckCount: Int, scope: CoroutineScope) = scope.produce {
-            var itemsCount = truckCount
-            while (itemsCount > 0) {
+        fun createLoadingChannel(scope: CoroutineScope) = scope.produce {
+            while (isActive) {
                 val truck: AnyDistributor = if (Random.nextBoolean()) FireTruck() else TankerTruck()
                 val type = Good.GoodCategory.values().random()
                 send(truck to type)
-                itemsCount--
             }
         }
     }
