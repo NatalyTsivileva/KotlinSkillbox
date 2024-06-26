@@ -5,6 +5,8 @@ import curswork.port.LoadingPort
 import curswork.port.UnloadingPort
 import curswork.storage.DistributionGoodStorage
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class DistributionCenter(
     private val scope: CoroutineScope,
@@ -28,6 +30,8 @@ class DistributionCenter(
 
         createLoadingPorts()
         openLoadingPorts()
+
+        startLogger()
     }
 
     private fun createUnloadingPorts() {
@@ -67,5 +71,11 @@ class DistributionCenter(
         loadingPorts.forEach { it.open() }
     }
 
+    private fun startLogger() {
+        scope.launch {
+            delay(workTimeInMls + 100)
+            println(storage.getStorageInfo())
+        }
+    }
 }
 

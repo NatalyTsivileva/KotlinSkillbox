@@ -1,6 +1,6 @@
 package curswork.goods.small
 
-class MobilePhone: SmallGood() {
+class MobilePhone : SmallGood() {
     override fun getVolume(): Int {
         return 200
     }

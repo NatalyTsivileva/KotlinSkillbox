@@ -1,13 +1,11 @@
 package curswork
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+
+
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.channels.produce
 import kotlinx.coroutines.runBlocking
-import kotlin.random.Random
-
-
-import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.*
 
 fun main() = runBlocking {
     var cur = numbersFrom(2)

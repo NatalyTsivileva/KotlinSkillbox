@@ -34,8 +34,8 @@ class LoadingPort(
 
                             if (item != null) {
                                 delay(item.getTime())
-                                distributor.addItem(item)
-                                logPortation(pair, item)
+                                val isAdded = distributor.addItem(item)
+                                if (isAdded) logPortation(pair, item)
                             }
 
                         } while (!distributor.isFull())

@@ -7,10 +7,10 @@ interface IDistributionItem {
     /**
      * Узнать вес/объём товара/услуг
      */
-    fun getVolume():Int
+    fun getVolume(): Int
 
     /**
      * Узнать время, необходимое для дистрибуции элемента
      */
-    fun getTime():Long
+    fun getTime(): Long
 }

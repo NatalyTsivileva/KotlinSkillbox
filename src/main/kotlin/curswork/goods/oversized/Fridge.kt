@@ -1,6 +1,6 @@
 package curswork.goods.oversized
 
-class Fridge: OversizeGood() {
+class Fridge : OversizeGood() {
     override fun getVolume(): Int {
         return 280
     }

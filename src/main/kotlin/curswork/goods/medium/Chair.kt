@@ -1,6 +1,6 @@
 package curswork.goods.medium
 
-class Chair: MediumGood() {
+class Chair : MediumGood() {
     override fun getVolume(): Int {
         return 120
     }

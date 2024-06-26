@@ -1,6 +1,6 @@
 package curswork.goods.oversized
 
-class Bed: OversizeGood() {
+class Bed : OversizeGood() {
     override fun getVolume(): Int {
         return 220
     }

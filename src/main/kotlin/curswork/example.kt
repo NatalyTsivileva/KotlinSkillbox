@@ -14,12 +14,12 @@ fun main() = runBlocking<Unit> {
     }
     //delay(950)
     //jobs.joinAll()
-        // producer.cancel() // cancel producer coroutine and thus kill them all
+    // producer.cancel() // cancel producer coroutine and thus kill them all
 }
 
 fun CoroutineScope.produceNumbers() = produce<Int> {
     var x = 1 // start from 1
-    while (x<10) {
+    while (x < 10) {
         send(x++) // produce next
         delay(1000) // wait 0.1s
     }

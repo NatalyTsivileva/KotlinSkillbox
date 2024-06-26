@@ -1,6 +1,6 @@
 package curswork.goods.small
 
-class Cosmetic: SmallGood() {
+class Cosmetic : SmallGood() {
     override fun getVolume(): Int {
         return 300
     }

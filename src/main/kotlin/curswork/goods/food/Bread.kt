@@ -1,6 +1,6 @@
 package curswork.goods.food
 
-class Bread: FoodGoods() {
+class Bread : FoodGoods() {
     override fun getVolume(): Int {
         return 500
     }

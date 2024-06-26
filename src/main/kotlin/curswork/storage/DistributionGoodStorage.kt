@@ -43,4 +43,12 @@ class DistributionGoodStorage : IGoodStorage {
         }
     }
 
+    fun getStorageInfo() {
+        val blackColor = "\u001B[30m"
+        println()
+        println("$blackColor============= Storage Info ===============")
+        (foodGoods + mediumGoods + smallGoods + oversizeGoods).groupBy { it.category }.forEach { goodCategory, goods ->
+            println("$blackColor${goodCategory.name.uppercase()} count=${goods.count()}")
+        }
+    }
 }
