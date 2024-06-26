@@ -8,6 +8,6 @@ fun main(args: Array<String>) = runBlocking{
         scope = this,
         unloadingPortCount = 5,
         loadingPortCount = 3,
-        workTimeInMls = TimeUnit.MINUTES.toMillis(5)
+        workTimeInMls = TimeUnit.MINUTES.toMillis(1)
     )
 }

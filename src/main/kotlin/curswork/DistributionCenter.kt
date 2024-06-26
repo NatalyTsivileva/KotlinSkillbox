@@ -5,9 +5,6 @@ import curswork.port.LoadingPort
 import curswork.port.UnloadingPort
 import curswork.storage.DistributionGoodStorage
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withTimeoutOrNull
 
 class DistributionCenter(
     private val scope: CoroutineScope,
@@ -31,8 +28,6 @@ class DistributionCenter(
 
         createLoadingPorts()
         openLoadingPorts()
-
-        startTimer()
     }
 
     private fun createUnloadingPorts() {
@@ -42,7 +37,8 @@ class DistributionCenter(
                 scope = scope,
                 portID = id,
                 saveItemFunction = storage::addItem,
-                channel = unloadingChannel
+                channel = unloadingChannel,
+                timeOutInMls = workTimeInMls
             )
 
             unloadingPorts.add(port)
@@ -60,7 +56,8 @@ class DistributionCenter(
                 scope = scope,
                 portID = id,
                 getItemFunction = storage::fetchGoodByCategory,
-                channel = loadingChannel
+                channel = loadingChannel,
+                timeOutInMls = workTimeInMls
             )
             loadingPorts.add(port)
         }
@@ -68,16 +65,6 @@ class DistributionCenter(
 
     private fun openLoadingPorts() {
         loadingPorts.forEach { it.open() }
-    }
-
-    private fun startTimer() {
-        scope.launch {
-            withTimeoutOrNull(workTimeInMls) {
-                delay(workTimeInMls)
-                loadingPorts.forEach { it.close() }
-                unloadingPorts.forEach { it.close() }
-            }
-        }
     }
 
 }

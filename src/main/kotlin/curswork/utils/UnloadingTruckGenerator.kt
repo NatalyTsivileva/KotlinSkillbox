@@ -17,12 +17,13 @@ import curswork.goods.small.Toy
 import curswork.trucks.FireTruck
 import curswork.trucks.TankerTruck
 import curswork.trucks.VanTruck
+import curswork.types.AnyDistributor
 import kotlin.random.Random
 
 object UnloadingTruckGenerator {
 
-    fun getRandomTruck(): IDistributor<IDistributionItem> {
-        val truck: IDistributor<IDistributionItem> = when (Random.nextInt(0, 3)) {
+    fun getRandomTruck(): AnyDistributor {
+        val truck: AnyDistributor = when (Random.nextInt(0, 3)) {
             0 -> FireTruck()
             1 -> TankerTruck()
             else -> VanTruck()
@@ -31,7 +32,7 @@ object UnloadingTruckGenerator {
         return truck
     }
 
-    private fun fillTruck(truck: IDistributor<IDistributionItem>) {
+    private fun fillTruck(truck: AnyDistributor) {
         val isFoodItem = Random.nextBoolean()
         var count = Random.nextInt(1, 1000)
         while (count > 0) {

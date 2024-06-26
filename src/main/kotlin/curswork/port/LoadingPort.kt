@@ -15,28 +15,34 @@ class LoadingPort(
     portID: Int,
     scope: CoroutineScope,
     channel: ReceiveChannel<AnyGoodsDistributor>,
+    timeOutInMls: Long,
     val getItemFunction: suspend (category: Good.GoodCategory) -> IDistributionItem?
-) : AbstractPort<AnyGoodsDistributor>(portID = portID, scope = scope, channel = channel) {
+) : AbstractPort<AnyGoodsDistributor>(portID = portID, scope = scope, channel = channel, timeOutInMls = timeOutInMls) {
 
     private var job: Job? = null
 
     override fun open() {
         job = scope.launch {
+            try {
+                withTimeout(timeOutInMls) {
+                    for (pair in channel) {
 
-            for (pair in channel) {
+                        do {
+                            val distributor = pair.first
+                            val item = getItemFunction(pair.second)
+                            delay(10)
 
-                do {
-                    val distributor = pair.first
-                    val item = getItemFunction(pair.second)
-                    delay(10)
+                            if (item != null) {
+                                delay(item.getTime())
+                                distributor.addItem(item)
+                                logPortation(pair, item)
+                            }
 
-                    if (item != null) {
-                        delay(item.getTime())
-                        distributor.addItem(item)
-                        logPortation(pair, item)
+                        } while (!distributor.isFull())
                     }
-
-                } while (!distributor.isFull())
+                }
+            } finally {
+                close()
             }
         }
     }

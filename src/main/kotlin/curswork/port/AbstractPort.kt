@@ -7,7 +7,8 @@ import kotlinx.coroutines.channels.ReceiveChannel
 abstract class AbstractPort<T>(
     val portID: Int,
     val scope: CoroutineScope,
-    val channel: ReceiveChannel<T>
+    val channel: ReceiveChannel<T>,
+    val timeOutInMls: Long
 ) : IPort {
 
     override fun close() {

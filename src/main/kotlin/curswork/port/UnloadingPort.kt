@@ -12,22 +12,29 @@ class UnloadingPort(
     scope: CoroutineScope,
     portID: Int,
     channel: ReceiveChannel<AnyDistributor>,
+    timeOutInMls: Long,
     val saveItemFunction: suspend (item: Good) -> Boolean
-) : AbstractPort<AnyDistributor>(scope = scope, portID = portID, channel = channel) {
+) : AbstractPort<AnyDistributor>(scope = scope, portID = portID, channel = channel, timeOutInMls = timeOutInMls) {
 
     private var job: Job? = null
 
     override fun open() {
         job = scope.launch {
-            for (distributor in channel) {
+            try {
+                withTimeout(timeOutInMls) {
+                    for (distributor in channel) {
 
-                distributor.getItems().forEach { item ->
-                    delay(item.getTime())
+                        distributor.getItems().forEach { item ->
+                            delay(item.getTime())
 
-                    (item as? Good)?.apply { saveItemFunction(this) }
+                            (item as? Good)?.apply { saveItemFunction(this) }
 
-                    logPortation(distributor, item)
+                            logPortation(distributor, item)
+                        }
+                    }
                 }
+            } finally {
+                close()
             }
         }
     }
