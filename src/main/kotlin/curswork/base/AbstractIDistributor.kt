@@ -1,14 +1,14 @@
 package curswork.base
 
-abstract class AbstractIDistributor : IDistributor {
+abstract class AbstractIDistributor<T : IDistributionItem> : IDistributor<T> {
 
-    private val items = mutableListOf<IDistributionItem>()
+    private val items = mutableListOf<T>()
 
-    override fun getItems(): List<IDistributionItem> {
+    override fun getItems(): List<T> {
         return items
     }
 
-    override fun addItem(item: IDistributionItem): Boolean {
+    override fun addItem(item: T): Boolean {
         val totalSum = items.sumOf { it.getVolume() }
         val isCanAdd = totalSum + item.getVolume() <= getCapacity()
         if (isCanAdd) items.add(item)

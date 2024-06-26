@@ -39,7 +39,7 @@ class UnloadingDistributionPort(
 
 
     override fun getDistributionProcessText(
-        distributor: IDistributor,
+        distributor: IDistributor<IDistributionItem>,
         item: IDistributionItem
     ): String {
         return "ВЫГРУЗКА::: Дистрибьютор:[${distributor::class.simpleName}] [${distributor.hashCode()}] выгрузил товар: ${item::class.simpleName}, вес: ${item.getVolume()} за время ${item.getTime()}"

@@ -9,7 +9,7 @@ import java.util.*
 
 abstract class AbstractPort {
 
-    private val distributorQueue: Queue<IDistributor> = LinkedList()
+    private val distributorQueue: Queue<IDistributor<IDistributionItem>> = LinkedList()
 
     protected val _distributionProcess = MutableSharedFlow<DistributionProcess<IDistributionItem>>()
     val distributionProcess: SharedFlow<DistributionProcess<IDistributionItem>> = _distributionProcess.asSharedFlow()
@@ -18,23 +18,23 @@ abstract class AbstractPort {
     /**
      * Получить дистрибьютера и удалить его из очереди
      */
-    protected fun getNextDistributor(): IDistributor? {
+    protected fun getNextDistributor(): IDistributor<IDistributionItem>? {
         return distributorQueue.poll()
     }
 
     /**
      * Получить дистрибьютора из очереди, но не удалять его
      */
-    protected fun getFirstDistributor(): IDistributor? {
+    protected fun getFirstDistributor(): IDistributor<IDistributionItem>? {
         return distributorQueue.peek()
     }
 
-    fun addDistributor(distributor: IDistributor): Boolean {
+    fun addDistributor(distributor: IDistributor<IDistributionItem>): Boolean {
         return distributorQueue.add(distributor)
     }
 
     abstract fun getDistributionProcessText(
-        distributor: IDistributor,
+        distributor: IDistributor<IDistributionItem>,
         item: IDistributionItem
     ): String
 }

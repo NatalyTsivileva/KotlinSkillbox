@@ -21,8 +21,8 @@ import kotlin.random.Random
 
 object UnloadingTruckGenerator {
 
-    fun getRandomTruck(): IDistributor {
-        val truck: IDistributor = when (Random.nextInt(0, 3)) {
+    fun getRandomTruck(): IDistributor<IDistributionItem> {
+        val truck: IDistributor<IDistributionItem> = when (Random.nextInt(0, 3)) {
             0 -> FireTruck()
             1 -> TankerTruck()
             else -> VanTruck()
@@ -31,7 +31,7 @@ object UnloadingTruckGenerator {
         return truck
     }
 
-    private fun fillTruck(truck: IDistributor) {
+    private fun fillTruck(truck: IDistributor<IDistributionItem>) {
         val isFoodItem = Random.nextBoolean()
         var count = Random.nextInt(1, 1000)
         while (count > 0) {
