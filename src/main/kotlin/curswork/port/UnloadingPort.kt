@@ -25,14 +25,12 @@ class UnloadingPort(
                     for (distributor in channel) {
 
                         distributor.getItems().forEach { item ->
-                            delay(item.getTime())
-
                             (item as? Good)?.apply {
                                 val saved = saveItemFunction(this)
                                 if (saved) logPortation(distributor, item)
                             }
 
-
+                            delay(item.getTime())
                         }
                     }
                 }

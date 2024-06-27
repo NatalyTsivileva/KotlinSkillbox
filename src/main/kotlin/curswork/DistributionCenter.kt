@@ -78,14 +78,12 @@ class DistributionCenter(
 
     private fun startLogger() {
         scope.launch {
-            val isUnloaded = unloadingPorts.all { !it.isOpen() }
-            val isLoaded = loadingPorts.all { !it.isOpen() }
-
             do {
-                delay(3000)
                 storage.logStorageInfo()
-            } while (!isUnloaded && !isLoaded)
+                delay(3000)
+            } while (unloadingPorts.all { it.isOpen() } && loadingPorts.all { it.isOpen() })
         }
     }
+
 }
 

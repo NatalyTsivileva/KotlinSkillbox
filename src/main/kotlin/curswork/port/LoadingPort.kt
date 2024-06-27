@@ -36,8 +36,8 @@ class LoadingPort(
                             val item = fetchItemFunction(goodCategory, distributor::addItem)
                             delay(10)
                             if (item != null) {
-                                delay(item.getTime())
                                 logPortation(pair, item)
+                                delay(item.getTime())
                             }
                         } while (!distributor.isFull())
 
@@ -59,10 +59,9 @@ class LoadingPort(
         val categoryName = portable.second.name.uppercase()
 
         val color = ColorfulLogger.Color.RED
-        var text = "\tЗАГРУЗКА: PortID=$portID $distributorName ГРУЗИТ ТОЛЬКО $categoryName"
-        logger.logColorful(text, color)
 
-        text = " \t\t$itemName вес: ${item.getVolume()}, за время ${item.getTime()}. Осталось места: $freePlace"
+        val text =
+            "\tЗАГРУЗКА: PortID=$portID $distributorName ГРУЗИТ ТОЛЬКО $categoryName\n\t $itemName вес: ${item.getVolume()}, за время ${item.getTime()}. Осталось места: $freePlace"
         logger.logColorful(text, color)
     }
 

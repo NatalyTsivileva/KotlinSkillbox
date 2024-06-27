@@ -18,7 +18,7 @@ fun main(args: Array<String>) = runBlocking {
     val job2 = launch {
         repeat(10) {
             val item = storage.fetchLast()
-            if(item!= null) println("Извлечено: $item") else println("Не извлечено, нет больше элементов")
+            if (item != null) println("Извлечено: $item") else println("Не извлечено, нет больше элементов")
             delay(randomTime())
         }
     }
@@ -41,7 +41,7 @@ fun main(args: Array<String>) = runBlocking {
 
 fun randomTime() = Random.nextInt(300, 1000).toLong()
 
-class Storage() {
+class Storage {
     val items = LinkedList<Int>()
 
     private val mutex = Mutex()
