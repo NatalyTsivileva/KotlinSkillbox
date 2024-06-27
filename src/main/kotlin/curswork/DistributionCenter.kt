@@ -21,6 +21,7 @@ class DistributionCenter(
     private val loadingPorts = mutableListOf<IPort>()
 
     private val unloadingChannel = UnloadingPort.createUnloadingChannel(scope)
+
     private val loadingChannel = LoadingPort.createLoadingChannel(scope)
 
     private val storage = DistributionGoodStorage(logger)
@@ -77,8 +78,13 @@ class DistributionCenter(
 
     private fun startLogger() {
         scope.launch {
-            delay(workTimeInMls + 100)
-            storage.logStorageInfo()
+            val isUnloaded = unloadingPorts.all { !it.isOpen() }
+            val isLoaded = loadingPorts.all { !it.isOpen() }
+
+            do {
+                delay(3000)
+                storage.logStorageInfo()
+            } while (!isUnloaded && !isLoaded)
         }
     }
 }

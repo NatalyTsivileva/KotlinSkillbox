@@ -18,10 +18,8 @@ class UnloadingPort(
     val logger: ColorfulLogger
 ) : AbstractPort<AnyDistributor>(scope = scope, portID = portID, channel = channel, timeOutInMls = timeOutInMls) {
 
-    private var job: Job? = null
-
     override fun open() {
-        job = scope.launch {
+        portJob = scope.launch {
             try {
                 withTimeout(timeOutInMls) {
                     for (distributor in channel) {
@@ -42,11 +40,6 @@ class UnloadingPort(
                 close()
             }
         }
-    }
-
-    override fun close() {
-        super.close()
-        job?.cancel()
     }
 
     override fun logPortation(portable: AnyDistributor, item: IDistributionItem) {

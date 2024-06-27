@@ -22,10 +22,9 @@ class LoadingPort(
     val logger: ColorfulLogger
 ) : AbstractPort<AnyGoodsDistributor>(portID = portID, scope = scope, channel = channel, timeOutInMls = timeOutInMls) {
 
-    private var job: Job? = null
 
     override fun open() {
-        job = scope.launch {
+        portJob = scope.launch {
             try {
                 withTimeout(timeOutInMls) {
 
@@ -37,6 +36,7 @@ class LoadingPort(
                             val item = fetchItemFunction(goodCategory, distributor::addItem)
                             delay(10)
                             if (item != null) {
+                                delay(item.getTime())
                                 logPortation(pair, item)
                             }
                         } while (!distributor.isFull())
@@ -50,10 +50,6 @@ class LoadingPort(
         }
     }
 
-    override fun close() {
-        super.close()
-        job?.cancel()
-    }
 
     override fun logPortation(portable: AnyGoodsDistributor, item: IDistributionItem) {
         val distributor = portable.first
