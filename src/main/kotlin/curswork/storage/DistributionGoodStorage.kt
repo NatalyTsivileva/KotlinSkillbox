@@ -22,42 +22,45 @@ class DistributionGoodStorage(
     private val smallGoods = LinkedList<SmallGood>()
 
     override suspend fun addItem(item: Good): Boolean {
+        val added = when (item) {
+            is FoodGoods -> foodGoods.add(item)
+            is MediumGood -> mediumGoods.add(item)
+            is OversizeGood -> oversizeGoods.add(item)
+            is SmallGood -> smallGoods.add(item)
+            else -> false
+        }
+        return added
+    }
+
+    override suspend fun fetchGoodByCategory(
+        category: Good.GoodCategory,
+        needFetch: (good: Good) -> Boolean
+    ): Good? {
         mutex.withLock {
-            val added = when (item) {
-                is FoodGoods -> foodGoods.add(item)
-                is MediumGood -> mediumGoods.add(item)
-                is OversizeGood -> oversizeGoods.add(item)
-                is SmallGood -> smallGoods.add(item)
-                else -> false
+            var removed: Good? = null
+
+            val goods: LinkedList<out Good> = getGoodsByCategory(category)
+
+            val item = goods.peek()
+
+            if (item != null && needFetch(item)) {
+                removed = goods.poll()
             }
-            return added
+
+            return removed
         }
     }
 
-
-    override suspend fun fetchGoodByCategory(category: Good.GoodCategory): Good? {
-        mutex.withLock {
-            return when (category) {
-                Good.GoodCategory.OVERSIZE -> oversizeGoods.poll()
-                Good.GoodCategory.MEDIUM -> mediumGoods.poll()
-                Good.GoodCategory.SMALL -> smallGoods.poll()
-                Good.GoodCategory.FOOD -> foodGoods.poll()
-            }
-        }
+    private fun getGoodsByCategory(category: Good.GoodCategory) = when (category) {
+        Good.GoodCategory.OVERSIZE -> oversizeGoods
+        Good.GoodCategory.MEDIUM -> mediumGoods
+        Good.GoodCategory.SMALL -> smallGoods
+        Good.GoodCategory.FOOD -> foodGoods
     }
 
-    override suspend fun getGoodByCategory(category: Good.GoodCategory): Good? {
-        mutex.withLock {
-            return when (category) {
-                Good.GoodCategory.OVERSIZE -> oversizeGoods.peek()
-                Good.GoodCategory.MEDIUM -> mediumGoods.peek()
-                Good.GoodCategory.SMALL -> smallGoods.peek()
-                Good.GoodCategory.FOOD -> foodGoods.peek()
-            }
-        }
-    }
 
-    fun getStorageInfo() {
+
+    fun logStorageInfo() {
         logger.logColorful("")
         logger.logColorful("============= Storage Info ===============")
         logger.logColorful("${Good.GoodCategory.FOOD.name.uppercase()} count=${foodGoods.count()}")

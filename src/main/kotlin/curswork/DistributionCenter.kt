@@ -64,7 +64,6 @@ class DistributionCenter(
                 scope = scope,
                 channel = loadingChannel,
                 timeOutInMls = workTimeInMls,
-                getItemFunction = storage::getGoodByCategory,
                 fetchItemFunction = storage::fetchGoodByCategory,
                 logger = logger
             )
@@ -79,7 +78,7 @@ class DistributionCenter(
     private fun startLogger() {
         scope.launch {
             delay(workTimeInMls + 100)
-            println(storage.getStorageInfo())
+            storage.logStorageInfo()
         }
     }
 }

@@ -30,7 +30,7 @@ class UnloadingPort(
                             delay(item.getTime())
 
                             (item as? Good)?.apply {
-                               val saved = saveItemFunction(this)
+                                val saved = saveItemFunction(this)
                                 if (saved) logPortation(distributor, item)
                             }
 
@@ -50,8 +50,10 @@ class UnloadingPort(
     }
 
     override fun logPortation(portable: AnyDistributor, item: IDistributionItem) {
-          val text =
-            "\tВЫГРУЗКА: PortID=$portID [${portable::class.simpleName}][${portable.hashCode()}] Выгрузил: ${item::class.simpleName}, вес: ${item.getVolume()}, за время ${item.getTime()}"
+        val portableName = "[${portable::class.simpleName}][${portable.hashCode()}]"
+        val itemName = "${item::class.simpleName}[${item.hashCode()}]"
+        val text =
+            "\tВЫГРУЗКА: PortID=$portID $portableName Выгрузил: $itemName, вес: ${item.getVolume()}, за время ${item.getTime()}"
         logger.logColorful(text, ColorfulLogger.Color.GREEN)
     }
 

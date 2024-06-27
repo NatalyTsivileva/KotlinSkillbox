@@ -7,6 +7,7 @@ import curswork.trucks.FireTruck
 import curswork.trucks.TankerTruck
 import curswork.types.AnyDistributor
 import curswork.types.AnyGoodsDistributor
+import curswork.types.FetchAnyGoodFunction
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.produce
@@ -17,8 +18,7 @@ class LoadingPort(
     scope: CoroutineScope,
     channel: ReceiveChannel<AnyGoodsDistributor>,
     timeOutInMls: Long,
-    val fetchItemFunction: suspend (category: Good.GoodCategory) -> IDistributionItem?,
-    val getItemFunction: suspend (category: Good.GoodCategory) -> IDistributionItem?,
+    val fetchItemFunction: FetchAnyGoodFunction,
     val logger: ColorfulLogger
 ) : AbstractPort<AnyGoodsDistributor>(portID = portID, scope = scope, channel = channel, timeOutInMls = timeOutInMls) {
 
@@ -33,19 +33,14 @@ class LoadingPort(
 
                         do {
                             val distributor = pair.first
-                            val item = getItemFunction(pair.second)
+                            val goodCategory = pair.second
+                            val item = fetchItemFunction(goodCategory, distributor::addItem)
                             delay(10)
-
                             if (item != null) {
-                                val isAdded = distributor.addItem(item)
-                                if (isAdded) {
-                                    logPortation(pair, item)
-                                    delay(item.getTime())
-                                    fetchItemFunction(pair.second)
-                                }
+                                logPortation(pair, item)
                             }
-
                         } while (!distributor.isFull())
+
                         logDistributorFetching(pair)
                     }
                 }
@@ -64,20 +59,21 @@ class LoadingPort(
         val distributor = portable.first
         val freePlace = distributor.getCapacity() - distributor.getItems().sumOf { it.getVolume() }
         val distributorName = "${distributor::class.simpleName}[ID=${distributor.hashCode()}]"
-        val itemName = item::class.simpleName
+        val itemName = "${item::class.simpleName}[${item.hashCode()}]"
         val categoryName = portable.second.name.uppercase()
 
         val color = ColorfulLogger.Color.RED
         var text = "\tЗАГРУЗКА: PortID=$portID $distributorName ГРУЗИТ ТОЛЬКО $categoryName"
         logger.logColorful(text, color)
 
-        text = " \t\t[$itemName] вес: ${item.getVolume()}, за время ${item.getTime()}. Осталось места: $freePlace"
+        text = " \t\t$itemName вес: ${item.getVolume()}, за время ${item.getTime()}. Осталось места: $freePlace"
         logger.logColorful(text, color)
     }
 
 
     private fun logDistributorFetching(portable: AnyGoodsDistributor) {
-        val text = "\tПолностью загружен и выехал из порта: PortID=$portID ${portable.first::class.simpleName}, категория:${portable.second.name.uppercase()}"
+        val text =
+            "\tПолностью загружен и выехал из порта: PortID=$portID ${portable.first::class.simpleName}, категория:${portable.second.name.uppercase()}"
         logger.logColorful(text)
     }
 
